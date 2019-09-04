@@ -73,7 +73,7 @@ ITEM_PIPELINES = {
    # # 'scrapy.pipelines.images.ImagesPipeline': 1,
    #  'ArticleSpider.pipelines.ArticleImagePipeline': 1,
    #  'ArticleSpider.pipelines.MysqlTwistedPipline': 1,
-    'ArticleSpider.pipelines.ElasticsearchPipeline': 1
+    'ArticleSpider.pipelines.FangspiderPipeline': 1
 }
 IMAGES_URLS_FIELD = "front_image_url"
 project_dir = os.path.abspath(os.path.dirname(__file__))
@@ -111,12 +111,11 @@ AUTOTHROTTLE_ENABLED = True
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-# 数据库配置
-
-MYSQL_HOST = "123.57.59.183"
+MYSQL_HOST = "127.0.0.1"
 MYSQL_DBNAME = "article_spider"
 MYSQL_USER = "root"
-MYSQL_PASSWORD = ""
+MYSQL_PASSWORD = "root"
+MYSQL_PORT = "8889"
 
 
 SQL_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"

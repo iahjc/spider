@@ -13,12 +13,32 @@ from twisted.enterprise import adbapi
 from models.es_types import ArticleType
 from w3lib.html import remove_tags
 
+import pymysql
+pymysql.install_as_MySQLdb()
 import MySQLdb
 import MySQLdb.cursors
+import re
 
 class ArticlespiderPipeline(object):
     def process_item(self, item, spider):
         return item
+
+class FangspiderPipeline(object):
+    # 采用同步的机制写入mysql
+    def __init__(self):
+        self.conn = MySQLdb.connect('localhost', 'root', 'root', 'article_spider', 8889,charset="utf8", use_unicode=True)
+        self.cursor = self.conn.cursor()
+    def process_item(self, item, spider):
+        # 正则判断是否是11位手机号 并且手机号不重复
+        ret = re.match(r"^1[35789]\d{9}$", item['phone'])
+        if ret :
+            insert_sql = """
+                               insert into test(name, phone, address)
+                               VALUES (%s, %s, %s) 
+                           """
+            self.cursor.execute(insert_sql, (item["name"], item["phone"], item["address"]))
+            self.conn.commit()
+
 
 
 class JsonWithEncodingPipeline(object):
@@ -36,7 +56,7 @@ class JsonWithEncodingPipeline(object):
 class MysqlPipeline(object):
     #采用同步的机制写入mysql
     def __init__(self):
-        self.conn = MySQLdb.connect('123.57.59.183', 'root', '', 'article_spider', charset="utf8", use_unicode=True)
+        self.conn = MySQLdb.connect('127.0.0.1', 'root', 'root', 'article_spider', charset="utf8", use_unicode=True)
         self.cursor = self.conn.cursor()
 
     def process_item(self, item, spider):
@@ -44,6 +64,7 @@ class MysqlPipeline(object):
             insert into jobbole_article(title, url, create_date, fav_nums)
             VALUES (%s, %s, %s, %s)
         """
+        print (11111111111)
         self.cursor.execute(insert_sql, (item["title"], item["url"], item["create_date"], item["fav_nums"]))
         self.conn.commit()
 
@@ -58,6 +79,7 @@ class MysqlTwistedPipline(object):
             host = settings["MYSQL_HOST"],
             db = settings["MYSQL_DBNAME"],
             user = settings["MYSQL_USER"],
+            port = '8889',
             passwd = settings["MYSQL_PASSWORD"],
             charset='utf8',
             cursorclass=MySQLdb.cursors.DictCursor,
